@@ -1,0 +1,10 @@
+D:\Projects\Visual Studio\source\Huffman_UI\bin\Debug\Huffman_UI.exe.config
+D:\Projects\Visual Studio\source\Huffman_UI\bin\Debug\Huffman_UI.exe
+D:\Projects\Visual Studio\source\Huffman_UI\bin\Debug\Huffman_UI.pdb
+D:\Projects\Visual Studio\source\Huffman_UI\obj\Debug\Huffman_UI.csprojAssemblyReference.cache
+D:\Projects\Visual Studio\source\Huffman_UI\obj\Debug\Huffman_UI.Form1.resources
+D:\Projects\Visual Studio\source\Huffman_UI\obj\Debug\Huffman_UI.Properties.Resources.resources
+D:\Projects\Visual Studio\source\Huffman_UI\obj\Debug\Huffman_UI.csproj.GenerateResource.cache
+D:\Projects\Visual Studio\source\Huffman_UI\obj\Debug\Huffman_UI.csproj.CoreCompileInputs.cache
+D:\Projects\Visual Studio\source\Huffman_UI\obj\Debug\Huffman_UI.exe
+D:\Projects\Visual Studio\source\Huffman_UI\obj\Debug\Huffman_UI.pdb

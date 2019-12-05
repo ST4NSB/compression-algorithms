@@ -1,0 +1,10 @@
+D:\Projects\Visual Studio\source\LZ77_UI\bin\Debug\LZ77_UI.exe.config
+D:\Projects\Visual Studio\source\LZ77_UI\bin\Debug\LZ77_UI.exe
+D:\Projects\Visual Studio\source\LZ77_UI\bin\Debug\LZ77_UI.pdb
+D:\Projects\Visual Studio\source\LZ77_UI\obj\Debug\LZ77_UI.csprojAssemblyReference.cache
+D:\Projects\Visual Studio\source\LZ77_UI\obj\Debug\LZ77_UI.Form1.resources
+D:\Projects\Visual Studio\source\LZ77_UI\obj\Debug\LZ77_UI.Properties.Resources.resources
+D:\Projects\Visual Studio\source\LZ77_UI\obj\Debug\LZ77_UI.csproj.GenerateResource.cache
+D:\Projects\Visual Studio\source\LZ77_UI\obj\Debug\LZ77_UI.csproj.CoreCompileInputs.cache
+D:\Projects\Visual Studio\source\LZ77_UI\obj\Debug\LZ77_UI.exe
+D:\Projects\Visual Studio\source\LZ77_UI\obj\Debug\LZ77_UI.pdb
