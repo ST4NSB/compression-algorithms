@@ -1,0 +1,10 @@
+C:\Users\adiba\source\repos\JPEG_UI\bin\Debug\JPEG_UI.exe.config
+C:\Users\adiba\source\repos\JPEG_UI\bin\Debug\JPEG_UI.exe
+C:\Users\adiba\source\repos\JPEG_UI\bin\Debug\JPEG_UI.pdb
+C:\Users\adiba\source\repos\JPEG_UI\obj\Debug\JPEG_UI.csprojAssemblyReference.cache
+C:\Users\adiba\source\repos\JPEG_UI\obj\Debug\JPEG_UI.Jpeg.resources
+C:\Users\adiba\source\repos\JPEG_UI\obj\Debug\JPEG_UI.Properties.Resources.resources
+C:\Users\adiba\source\repos\JPEG_UI\obj\Debug\JPEG_UI.csproj.GenerateResource.cache
+C:\Users\adiba\source\repos\JPEG_UI\obj\Debug\JPEG_UI.csproj.CoreCompileInputs.cache
+C:\Users\adiba\source\repos\JPEG_UI\obj\Debug\JPEG_UI.exe
+C:\Users\adiba\source\repos\JPEG_UI\obj\Debug\JPEG_UI.pdb
