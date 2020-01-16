@@ -1,0 +1,10 @@
+D:\Projects\Visual Studio\source\PredictorFormsApp\obj\Debug\PredictorFormsApp.csprojAssemblyReference.cache
+D:\Projects\Visual Studio\source\PredictorFormsApp\obj\Debug\PredictorFormsApp.Properties.Resources.resources
+D:\Projects\Visual Studio\source\PredictorFormsApp\obj\Debug\PredictorFormsApp.csproj.GenerateResource.cache
+D:\Projects\Visual Studio\source\PredictorFormsApp\obj\Debug\PredictorFormsApp.csproj.CoreCompileInputs.cache
+D:\Projects\Visual Studio\source\PredictorFormsApp\bin\Debug\PredictorFormsApp.exe.config
+D:\Projects\Visual Studio\source\PredictorFormsApp\bin\Debug\PredictorFormsApp.exe
+D:\Projects\Visual Studio\source\PredictorFormsApp\bin\Debug\PredictorFormsApp.pdb
+D:\Projects\Visual Studio\source\PredictorFormsApp\obj\Debug\PredictorFormsApp.Form1.resources
+D:\Projects\Visual Studio\source\PredictorFormsApp\obj\Debug\PredictorFormsApp.exe
+D:\Projects\Visual Studio\source\PredictorFormsApp\obj\Debug\PredictorFormsApp.pdb
