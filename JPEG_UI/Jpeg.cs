@@ -14,6 +14,9 @@ namespace JPEG_UI
         public double[,] Luminance;
         public double[,] BlueDifference_Cb, RedDifference_Cr;
 
+        public double[,] DctLuminance, DctBlueDiff, DctRedDiff;
+        public double[,] QuantLuminance, QuantBlueDiff, QuantRedDiff;
+
         public void ConvertToYCbCr(PictureBox matrix)
         {
             double[,] CbCopy, CrCopy;
@@ -125,9 +128,9 @@ namespace JPEG_UI
 
             switch (type)
             {
-                case "Y": this.Luminance = dctMatrix; break;
-                case "Cb": this.BlueDifference_Cb = dctMatrix; break;
-                case "Cr": this.RedDifference_Cr = dctMatrix; break;
+                case "Y": this.Luminance = dctMatrix; this.DctLuminance = dctMatrix; break;
+                case "Cb": this.BlueDifference_Cb = dctMatrix; this.DctBlueDiff = dctMatrix; break;
+                case "Cr": this.RedDifference_Cr = dctMatrix; this.DctRedDiff = dctMatrix; break;
             }
         }
 
@@ -170,6 +173,16 @@ namespace JPEG_UI
                 return 1.0;
         }
 
+        private void AssignMatrixQuant(double[,] matrix, string type)
+        {
+            switch (type)
+            {
+                case "Y": this.Luminance = matrix; this.QuantLuminance = matrix; break;
+                case "Cb": this.BlueDifference_Cb = matrix; this.QuantBlueDiff = matrix; break;
+                case "Cr": this.RedDifference_Cr = matrix; this.QuantRedDiff = matrix; break;
+            }
+        }
+
         public void zigZagQuantization(double[,] matrix, int Nr, string type)
         {
             int length = matrix.GetLength(0);
@@ -197,12 +210,7 @@ namespace JPEG_UI
                 }
             }
 
-            switch (type)
-            {
-                case "Y": this.Luminance = newMat; break;
-                case "Cb": this.BlueDifference_Cb = newMat; break;
-                case "Cr": this.RedDifference_Cr = newMat; break;
-            }
+            AssignMatrixQuant(newMat, type);
         }
 
         private List<List<int>> findIndexesZigZag(int Nr, int length)
@@ -250,12 +258,7 @@ namespace JPEG_UI
                         for (int y = 0; y < 8; y++)
                             quantMatrix[x + i, y + j] = matrix[x + i, j + y] + (1 + (x + y) * R_quant);
 
-            switch (type)
-            {
-                case "Y": this.Luminance = quantMatrix; break;
-                case "Cb": this.BlueDifference_Cb = quantMatrix; break;
-                case "Cr": this.RedDifference_Cr = quantMatrix; break;
-            }
+            AssignMatrixQuant(quantMatrix, type);
         }
 
         public void SimpleMatrixInverseQuantization(double[,] matrix, int R_quant, string type)
@@ -337,12 +340,7 @@ namespace JPEG_UI
                             QuantMatrix[i + x, y + j] += matrix[i + x, j + y]; 
                         }
 
-            switch (type)
-            {
-                case "Y": this.Luminance = QuantMatrix; break;
-                case "Cb": this.BlueDifference_Cb = QuantMatrix; break;
-                case "Cr": this.RedDifference_Cr = QuantMatrix; break;
-            }
+            AssignMatrixQuant(QuantMatrix, type);
         }
 
         public void qualityFactorJpegInverseQuantization(double[,] matrix, int q_jpeg, string type)

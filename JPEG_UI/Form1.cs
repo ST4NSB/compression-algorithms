@@ -196,6 +196,88 @@ namespace JPEG_UI
                 }
             smallDecodePictureBox.Image = bmp;
 
+
+            if (dctCheckBox.Checked)
+            {
+                richTextBox.AppendText("\nDCT Y\n");
+                for (int y = 0; y < 8; y++)
+                {
+                    for (int x = 0; x < 8; x++)
+                    {
+                        richTextBox.AppendText(jpgLogic.DctLuminance[iy + y, jx + x] + "\n");
+                    }
+                    richTextBox.AppendText("---------\n");
+                }
+
+                richTextBox.AppendText("\nDCT Cb\n");
+                for (int y = 0; y < 8; y++)
+                {
+                    for (int x = 0; x < 8; x++)
+                    {
+                        richTextBox.AppendText(jpgLogic.DctBlueDiff[iy / 2 + y, jx / 2 + x] + "\n");
+                    }
+                    richTextBox.AppendText("---------\n");
+                }
+
+                richTextBox.AppendText("\nDCT Cr\n");
+                for (int y = 0; y < 8; y++)
+                {
+                    for (int x = 0; x < 8; x++)
+                    {
+                        richTextBox.AppendText(jpgLogic.DctRedDiff[iy / 2 + y, jx / 2 + x] + "\n");
+                    }
+                    richTextBox.AppendText("---------\n");
+                }
+            }
+
+            if(quantCheckBox.Checked)
+            {
+                richTextBox.AppendText("\nQuantization Y\n");
+                for (int y = 0; y < 8; y++)
+                {
+                    for (int x = 0; x < 8; x++)
+                    {
+                        richTextBox.AppendText(jpgLogic.QuantLuminance[iy + y, jx + x] + "\n");
+                    }
+                    richTextBox.AppendText("---------\n");
+                }
+
+                richTextBox.AppendText("\nQuantization Cb\n");
+                for (int y = 0; y < 8; y++)
+                {
+                    for (int x = 0; x < 8; x++)
+                    {
+                        richTextBox.AppendText(jpgLogic.QuantBlueDiff[iy / 2 + y, jx / 2 + x] + "\n");
+                    }
+                    richTextBox.AppendText("---------\n");
+                }
+
+                richTextBox.AppendText("\nQuantization Cr\n");
+                for (int y = 0; y < 8; y++)
+                {
+                    for (int x = 0; x < 8; x++)
+                    {
+                        richTextBox.AppendText(jpgLogic.QuantRedDiff[iy / 2 + y, jx / 2 + x] + "\n");
+                    }
+                    richTextBox.AppendText("---------\n");
+                }
+            }
+
+            richTextBox.AppendText("\nReconstruit\n");
+            for (int y = 0; y < 8; y++)
+            {
+                for (int x = 0; x < 8; x++)
+                {
+                    richTextBox.AppendText(block[y, x] + "\n");
+                }
+                richTextBox.AppendText("---------\n");
+            }
+
+        }
+
+        private void ClrBttn_Click(object sender, EventArgs e)
+        {
+            richTextBox.Clear();
         }
 
         private void OriginalPictureBox_MouseClick(object sender, MouseEventArgs e)
@@ -222,6 +304,16 @@ namespace JPEG_UI
                         }
                 }
             smallOrigPictureBox.Image = bmp;
+
+            richTextBox.AppendText("\nOriginal\n");
+            for (int y = 0; y < 8; y++)
+            {
+                for (int x = 0; x < 8; x++)
+                {
+                    richTextBox.AppendText(block[y, x] + "\n");
+                }
+                richTextBox.AppendText("---------\n");
+            }
         }
     }
 }

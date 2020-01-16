@@ -42,6 +42,9 @@
             this.richTextBox = new System.Windows.Forms.RichTextBox();
             this.smallOrigPictureBox = new System.Windows.Forms.PictureBox();
             this.smallDecodePictureBox = new System.Windows.Forms.PictureBox();
+            this.clrBttn = new System.Windows.Forms.Button();
+            this.dctCheckBox = new System.Windows.Forms.CheckBox();
+            this.quantCheckBox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.originalPictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.decodedPictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.errorPictureBox)).BeginInit();
@@ -62,7 +65,7 @@
             // decodedPictureBox
             // 
             this.decodedPictureBox.BackColor = System.Drawing.SystemColors.ButtonShadow;
-            this.decodedPictureBox.Location = new System.Drawing.Point(367, 34);
+            this.decodedPictureBox.Location = new System.Drawing.Point(348, 34);
             this.decodedPictureBox.Name = "decodedPictureBox";
             this.decodedPictureBox.Size = new System.Drawing.Size(256, 256);
             this.decodedPictureBox.TabIndex = 1;
@@ -117,7 +120,7 @@
             // errorPictureBox
             // 
             this.errorPictureBox.BackColor = System.Drawing.SystemColors.ButtonShadow;
-            this.errorPictureBox.Location = new System.Drawing.Point(698, 34);
+            this.errorPictureBox.Location = new System.Drawing.Point(661, 34);
             this.errorPictureBox.Name = "errorPictureBox";
             this.errorPictureBox.Size = new System.Drawing.Size(256, 256);
             this.errorPictureBox.TabIndex = 7;
@@ -135,7 +138,7 @@
             // 
             // factorTextBox
             // 
-            this.factorTextBox.Location = new System.Drawing.Point(818, 302);
+            this.factorTextBox.Location = new System.Drawing.Point(787, 302);
             this.factorTextBox.Name = "factorTextBox";
             this.factorTextBox.Size = new System.Drawing.Size(100, 20);
             this.factorTextBox.TabIndex = 9;
@@ -144,7 +147,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(733, 307);
+            this.label1.Location = new System.Drawing.Point(702, 307);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(79, 13);
             this.label1.TabIndex = 10;
@@ -152,16 +155,16 @@
             // 
             // richTextBox
             // 
-            this.richTextBox.Location = new System.Drawing.Point(994, 34);
+            this.richTextBox.Location = new System.Drawing.Point(946, 34);
             this.richTextBox.Name = "richTextBox";
-            this.richTextBox.Size = new System.Drawing.Size(516, 682);
+            this.richTextBox.Size = new System.Drawing.Size(576, 682);
             this.richTextBox.TabIndex = 11;
             this.richTextBox.Text = "";
             // 
             // smallOrigPictureBox
             // 
             this.smallOrigPictureBox.BackColor = System.Drawing.SystemColors.ButtonShadow;
-            this.smallOrigPictureBox.Location = new System.Drawing.Point(131, 504);
+            this.smallOrigPictureBox.Location = new System.Drawing.Point(115, 504);
             this.smallOrigPictureBox.Name = "smallOrigPictureBox";
             this.smallOrigPictureBox.Size = new System.Drawing.Size(64, 64);
             this.smallOrigPictureBox.TabIndex = 12;
@@ -170,17 +173,50 @@
             // smallDecodePictureBox
             // 
             this.smallDecodePictureBox.BackColor = System.Drawing.SystemColors.ButtonShadow;
-            this.smallDecodePictureBox.Location = new System.Drawing.Point(467, 504);
+            this.smallDecodePictureBox.Location = new System.Drawing.Point(431, 504);
             this.smallDecodePictureBox.Name = "smallDecodePictureBox";
             this.smallDecodePictureBox.Size = new System.Drawing.Size(64, 64);
             this.smallDecodePictureBox.TabIndex = 13;
             this.smallDecodePictureBox.TabStop = false;
+            // 
+            // clrBttn
+            // 
+            this.clrBttn.Location = new System.Drawing.Point(842, 693);
+            this.clrBttn.Name = "clrBttn";
+            this.clrBttn.Size = new System.Drawing.Size(75, 23);
+            this.clrBttn.TabIndex = 14;
+            this.clrBttn.Text = "Clear TxtBox";
+            this.clrBttn.UseVisualStyleBackColor = true;
+            this.clrBttn.Click += new System.EventHandler(this.ClrBttn_Click);
+            // 
+            // dctCheckBox
+            // 
+            this.dctCheckBox.AutoSize = true;
+            this.dctCheckBox.Location = new System.Drawing.Point(787, 427);
+            this.dctCheckBox.Name = "dctCheckBox";
+            this.dctCheckBox.Size = new System.Drawing.Size(79, 17);
+            this.dctCheckBox.TabIndex = 15;
+            this.dctCheckBox.Text = "DCT Matrix";
+            this.dctCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // quantCheckBox
+            // 
+            this.quantCheckBox.AutoSize = true;
+            this.quantCheckBox.Location = new System.Drawing.Point(787, 452);
+            this.quantCheckBox.Name = "quantCheckBox";
+            this.quantCheckBox.Size = new System.Drawing.Size(116, 17);
+            this.quantCheckBox.TabIndex = 16;
+            this.quantCheckBox.Text = "Quantization Matrix";
+            this.quantCheckBox.UseVisualStyleBackColor = true;
             // 
             // Jpeg
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1534, 760);
+            this.Controls.Add(this.quantCheckBox);
+            this.Controls.Add(this.dctCheckBox);
+            this.Controls.Add(this.clrBttn);
             this.Controls.Add(this.smallDecodePictureBox);
             this.Controls.Add(this.smallOrigPictureBox);
             this.Controls.Add(this.richTextBox);
@@ -223,6 +259,9 @@
         private System.Windows.Forms.RichTextBox richTextBox;
         private System.Windows.Forms.PictureBox smallOrigPictureBox;
         private System.Windows.Forms.PictureBox smallDecodePictureBox;
+        private System.Windows.Forms.Button clrBttn;
+        private System.Windows.Forms.CheckBox dctCheckBox;
+        private System.Windows.Forms.CheckBox quantCheckBox;
     }
 }
 
