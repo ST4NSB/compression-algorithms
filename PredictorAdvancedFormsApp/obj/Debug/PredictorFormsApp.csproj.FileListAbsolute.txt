@@ -18,3 +18,13 @@ D:\Projects\github\compression-algorithms\PredictorFormsApp\obj\Debug\PredictorF
 D:\Projects\github\compression-algorithms\PredictorFormsApp\obj\Debug\PredictorFormsApp.csproj.CoreCompileInputs.cache
 D:\Projects\github\compression-algorithms\PredictorFormsApp\obj\Debug\PredictorFormsApp.exe
 D:\Projects\github\compression-algorithms\PredictorFormsApp\obj\Debug\PredictorFormsApp.pdb
+D:\Projects\github\compression-algorithms\PredictorAdvancedFormsApp\bin\Debug\PredictorFormsApp.exe.config
+D:\Projects\github\compression-algorithms\PredictorAdvancedFormsApp\bin\Debug\PredictorFormsApp.exe
+D:\Projects\github\compression-algorithms\PredictorAdvancedFormsApp\bin\Debug\PredictorFormsApp.pdb
+D:\Projects\github\compression-algorithms\PredictorAdvancedFormsApp\obj\Debug\PredictorFormsApp.csprojAssemblyReference.cache
+D:\Projects\github\compression-algorithms\PredictorAdvancedFormsApp\obj\Debug\PredictorFormsApp.Form1.resources
+D:\Projects\github\compression-algorithms\PredictorAdvancedFormsApp\obj\Debug\PredictorFormsApp.Properties.Resources.resources
+D:\Projects\github\compression-algorithms\PredictorAdvancedFormsApp\obj\Debug\PredictorFormsApp.csproj.GenerateResource.cache
+D:\Projects\github\compression-algorithms\PredictorAdvancedFormsApp\obj\Debug\PredictorFormsApp.csproj.CoreCompileInputs.cache
+D:\Projects\github\compression-algorithms\PredictorAdvancedFormsApp\obj\Debug\PredictorFormsApp.exe
+D:\Projects\github\compression-algorithms\PredictorAdvancedFormsApp\obj\Debug\PredictorFormsApp.pdb
