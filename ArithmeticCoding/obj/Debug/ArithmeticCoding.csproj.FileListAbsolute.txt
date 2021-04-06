@@ -1,0 +1,10 @@
+D:\Projects\github\compression-algorithms\ArithmeticCoding\bin\Debug\ArithmeticCoding.exe.config
+D:\Projects\github\compression-algorithms\ArithmeticCoding\bin\Debug\ArithmeticCoding.exe
+D:\Projects\github\compression-algorithms\ArithmeticCoding\bin\Debug\ArithmeticCoding.pdb
+D:\Projects\github\compression-algorithms\ArithmeticCoding\obj\Debug\ArithmeticCoding.csprojAssemblyReference.cache
+D:\Projects\github\compression-algorithms\ArithmeticCoding\obj\Debug\ArithmeticCoding.AppView.resources
+D:\Projects\github\compression-algorithms\ArithmeticCoding\obj\Debug\ArithmeticCoding.Properties.Resources.resources
+D:\Projects\github\compression-algorithms\ArithmeticCoding\obj\Debug\ArithmeticCoding.csproj.GenerateResource.cache
+D:\Projects\github\compression-algorithms\ArithmeticCoding\obj\Debug\ArithmeticCoding.csproj.CoreCompileInputs.cache
+D:\Projects\github\compression-algorithms\ArithmeticCoding\obj\Debug\ArithmeticCoding.exe
+D:\Projects\github\compression-algorithms\ArithmeticCoding\obj\Debug\ArithmeticCoding.pdb
