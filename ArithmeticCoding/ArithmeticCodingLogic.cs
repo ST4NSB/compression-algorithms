@@ -1,13 +1,10 @@
 ﻿using BitReaderWriter;
-using System;
-using System.IO;
 
 namespace ArithmeticCoding
 {
     public class ArithmeticCodingLogic
     {
-        private const uint TOTAL_SYMBOLS = 257; // ASCII range
-        private const uint EOF = 256;
+        private const uint EOF = 256, TOTAL_SYMBOLS = 257;
 
         private BitReader _bitReader;
         private BitWriter _bitWriter;
@@ -78,7 +75,7 @@ namespace ArithmeticCoding
             _decodingValue |= GetBitsFromEncodedFile(32);
             for (; ; )
             {
-                uint symbol = DecodeSymbol(inputFile);
+                uint symbol = DecodeSymbol();
                 if (symbol >= EOF) // eof
                 {
                     break;
@@ -109,42 +106,37 @@ namespace ArithmeticCoding
             {
                 var highFirstShift = (_high & 0x80000000) >> 31;
                 var lowFirstShift = (_low & 0x80000000) >> 31;
-
-                var isHighUnderflow = ((_high & 0xC0000000) >> 30) == 2;
-                var isLowUnderflow = ((_low & 0xC0000000) >> 30) == 1;
+                var isUnderFlow = (_high & 0xC0000000) == 0x80000000 && (_low & 0xC0000000) == 0x40000000;
 
                 if (highFirstShift == lowFirstShift)
                 {
-                    writeToFile(highFirstShift & lowFirstShift);
+                    writeToFile(highFirstShift);
 
-                    _high <<= 1;
-                    _high |= highFirstShift;
                     _low <<= 1;
-                    _low |= lowFirstShift;
+                    _high <<= 1;
+                    _high |= 1;
                 }
-                else if (isHighUnderflow && isLowUnderflow)
+                else if (isUnderFlow)
                 {
-                    _underflowCounter += 1;
+                    _underflowCounter++;
+                    _low &= 0x3FFFFFFF;
+                    _high |= 0x40000000;
 
-                    _high <<= 1;
-                    _high |= highFirstShift;
                     _low <<= 1;
-                    _low |= lowFirstShift;
-
-                    _high |= 0x80000000; // set MSB to 1
-                    _low &= 0x7FFFFFFF; // set MSB to 0
+                    _high <<= 1;
+                    _high |= 1;
                 }
                 else
                 {
-                    break;
+                    return;
                 }
             }
         }
 
-        private uint DecodeSymbol(string inputFile)
+        private uint DecodeSymbol()
         {
             ulong range = (ulong)(_high - _low) + 1;
-            uint counts = (uint)((((ulong)(_decodingValue - _low) + 1) * _sums[TOTAL_SYMBOLS] - 1) / range);
+            var counts = (int)((((ulong)(_decodingValue - _low) + 1) * _sums[TOTAL_SYMBOLS] - 1) / range);
             uint symbol;
 
             for (symbol = EOF; counts < _sums[symbol]; symbol--)
@@ -168,33 +160,27 @@ namespace ArithmeticCoding
             {
                 var highFirstShift = (_high & 0x80000000) >> 31;
                 var lowFirstShift = (_low & 0x80000000) >> 31;
-
-                var isHighUnderflow = ((_high & 0xC0000000) >> 30) == 2;
-                var isLowUnderflow = ((_low & 0xC0000000) >> 30) == 1;
+                var isUnderFlow = (_high & 0xC0000000) == 0x80000000 && (_low & 0xC0000000) == 0x40000000;
 
                 if (highFirstShift == lowFirstShift)
                 {
-                    _high <<= 1;
-                    _high |= highFirstShift;
                     _low <<= 1;
-                    _low |= lowFirstShift;
-
+                    _high <<= 1;
+                    _high |= 1;
                     _decodingValue <<= 1;
                     _decodingValue |= GetBitsFromEncodedFile();
                 }
-                else if (isHighUnderflow && isLowUnderflow)
+                else if (isUnderFlow)
                 {
-                    _high <<= 1;
-                    _high |= highFirstShift;
-                    _low <<= 1;
-                    _low |= lowFirstShift;
+                    _decodingValue ^= 0x40000000;
+                    _low &= 0x3FFFFFFF; 
+                    _high |= 0x40000000;
 
+                    _low <<= 1;
+                    _high <<= 1;
+                    _high |= 1;
                     _decodingValue <<= 1;
                     _decodingValue |= GetBitsFromEncodedFile();
-
-                    _high |= 0x80000000; // set MSB to 1
-                    _low &= 0x7FFFFFFF; // set MSB to 0
-                    _decodingValue ^= 0x80000000;
                 }
                 else
                 {
@@ -221,7 +207,7 @@ namespace ArithmeticCoding
 
         private void UpdateModel(uint symbol)
         {
-            _counts[symbol]++;         
+            _counts[symbol]++;
             while (true)
             {
                 symbol++;
@@ -236,8 +222,8 @@ namespace ArithmeticCoding
         private void FlushBuffer()
         {
             _underflowCounter++;
-            var firstQuarter = _low >> 31;
-            writeToFile(firstQuarter);
+            var underflowBitsLeft = _low >> 30;
+            writeToFile(underflowBitsLeft);
         }
     }
 }
