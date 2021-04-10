@@ -1,124 +1,243 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using BitReaderWriter;
+using System;
+using System.IO;
 
 namespace ArithmeticCoding
 {
-    public class ArithmeticCodingLogic<T>
+    public class ArithmeticCodingLogic
     {
-        private uint _high, _low;
-        private ulong _range;
-        
-        private List<uint> _sum;
-        private List<Tuple<T, uint>> _counts;
+        private const uint TOTAL_SYMBOLS = 257; // ASCII range
+        private const uint EOF = 256;
 
-        private int _underflowCounter;
+        private BitReader _bitReader;
+        private BitWriter _bitWriter;
+
+        private uint _high, _low, _underflowCounter, _decodingValue;
+        private uint[] _counts, _sums;
 
         public ArithmeticCodingLogic()
         {
             _low = uint.MinValue;
             _high = uint.MaxValue;
-            _range = ulong.MinValue;
-            _counts = new List<Tuple<T, uint>>();
-            _sum = new List<uint>();
-            _underflowCounter = 0;
+            _underflowCounter = uint.MinValue;
+            _decodingValue = uint.MinValue;
+
+            _counts = new uint[TOTAL_SYMBOLS];
+            _sums = new uint[TOTAL_SYMBOLS + 1];
+            CreateDictionaryAndSum();
         }
 
-        public uint Encode(T[] input)
+        private void CreateDictionaryAndSum()
         {
-            CreateDictionaryAndSum(input);
-            var output = default(uint);
-
-            for(int i = 0; i < input.Length; i++)
+            _sums[0] = 0;
+            for (uint i = 0; i < TOTAL_SYMBOLS; i++)
             {
-                var symbol = input[i];
+                _counts[i] = 1;
+                _sums[i + 1] = _sums[i] + _counts[i];
+            }
+        }
 
-                _range = ((ulong)_high - _low) + 1;
-                _high = _low + (uint)((_range * GetSumAtSymbol(symbol, 1)) / _sum.Last() - 1);
-                _low = _low + (uint)((_range * GetSumAtSymbol(symbol)) / _sum.Last());
-
-                var firstShiftOutput = CheckFirstShift();
-                if (firstShiftOutput != null)
+        public void Encode(string inputFile, int bitsToRead = 8)
+        {
+            _bitReader = new BitReader(inputFile);
+            string outputFileName = inputFile + ".ac";
+            _bitWriter = new BitWriter(outputFileName);
+            var fileSize = bitsToRead * inputFile.Length;
+            
+            do
+            {
+                int readBits = bitsToRead;
+                if (readBits > fileSize)
                 {
-                    ShiftWithBitAdd(ref output, (uint)firstShiftOutput);
+                    readBits = fileSize;
                 }
 
-                CheckSecondShift();
-            }
+                var symbol = _bitReader.ReadNBits(readBits);
+                EncodeSymbol(symbol);
+                UpdateModel(symbol);
 
-            return output;
-        }
-
-        public T[] Decode(T[] input)
-        {
-            return new T[] { };
-        }
-
-        private uint? CheckFirstShift()
-        {
-            var highMSB = (_high & 0x80000000) >> 31;
-            var lowMSB = (_low & 0x80000000) >> 31;
-
-            if (highMSB == lowMSB)
-            {
-                ShiftWithBitAdd(ref _high, highMSB);
-                ShiftWithBitAdd(ref _low, lowMSB);
-
-                return lowMSB & highMSB;
-            }
-
-            return null;
-        }
-
-        private void CheckSecondShift()
-        {
-            var isHighUnderflow = ((_high & 0x80000000) >> 31) == 1 
-                               && ((_high & 0x40000000) >> 30) == 0;
-            var isLowUnderflow = ((_low & 0x80000000) >> 31) == 0
-                               && ((_low & 0x40000000) >> 30) == 1;
-
-            if (isHighUnderflow && isLowUnderflow)
-            {
-                ShiftWithBitAdd(ref _high, 1);
-                ShiftWithBitAdd(ref _low, 0);
-
-                _high |= 0x80000000; // set MSB to 1
-                _low &= 0x7FFFFFFF; // set MSB to 0
-
-                _underflowCounter++;
-            }
-        }
-
-        private void ShiftWithBitAdd(ref uint number, uint bit)
-        {
-            number <<= 1;
-            while (bit != 0)
-            {
-                uint carry = number & bit;
-                number = number ^ bit;
-                bit = carry << 1;
-            }
-        }
-
-        private ulong GetSumAtSymbol(T element, int positionAdder = 0)
-        {
-            var index = _counts.IndexOf(_counts.First(x => x.Item1.Equals(element))) + positionAdder;
-            return _sum[index];
-        }
-
-        private void CreateDictionaryAndSum(T[] input)
-        {
-            _counts = input.GroupBy(x => x)
-                           .ToDictionary(y => y.Key, y => (uint)y.Count())
-                           .Select(z => new Tuple<T, uint>(z.Key, z.Value)).ToList();
+                fileSize -= readBits;
+            } while (fileSize > 0);
             
-            for (var i = -1; i < _counts.Count; i++)
+            _bitReader.Dispose();
+            
+            EncodeSymbol(EOF);
+            FlushBuffer();
+            _bitWriter.WriteNBits(7, 1);
+            _bitWriter.Dispose();
+        }
+
+        public void Decode(string inputFile, int bitsToWrite = 8)
+        {
+            _bitReader = new BitReader(inputFile);
+            var splittedInput = inputFile.Split('.');
+            var extension = splittedInput[splittedInput.Length - 2];
+            string outputFileName = inputFile + ".decoded." + extension;
+            _bitWriter = new BitWriter(outputFileName);
+
+            _decodingValue |= GetBitsFromEncodedFile(32);
+            for (; ; )
             {
-                var sumOfPrecedentCounts = _counts.Where((elem, index) => index <= i).Sum(x => x.Item2);
-                _sum.Add((uint)sumOfPrecedentCounts);
+                uint symbol = DecodeSymbol(inputFile);
+                if (symbol >= EOF) // eof
+                {
+                    break;
+                }
+
+                _bitWriter.WriteNBits(bitsToWrite, symbol);
+                UpdateModel(symbol);
             }
+            
+            _bitReader.Dispose();
+            _bitWriter.WriteNBits(7, 1);
+            _bitWriter.Dispose();
+        }
+
+        private uint GetBitsFromEncodedFile(int bitsToRead = 1)
+        {
+            var bits = _bitReader.ReadNBits(bitsToRead);
+            return bits;
+        }
+
+        private void EncodeSymbol(uint symbol)
+        {
+            ulong range = (ulong)(_high - _low) + 1;
+            _high = _low + (uint)((range * _sums[symbol + 1]) / _sums[TOTAL_SYMBOLS] - 1);
+            _low = _low +  (uint)((range * _sums[symbol]) / _sums[TOTAL_SYMBOLS]);
+
+            for (; ; )
+            {
+                var highFirstShift = (_high & 0x80000000) >> 31;
+                var lowFirstShift = (_low & 0x80000000) >> 31;
+
+                var isHighUnderflow = ((_high & 0xC0000000) >> 30) == 2;
+                var isLowUnderflow = ((_low & 0xC0000000) >> 30) == 1;
+
+                if (highFirstShift == lowFirstShift)
+                {
+                    writeToFile(highFirstShift & lowFirstShift);
+
+                    _high <<= 1;
+                    _high |= highFirstShift;
+                    _low <<= 1;
+                    _low |= lowFirstShift;
+                }
+                else if (isHighUnderflow && isLowUnderflow)
+                {
+                    _underflowCounter += 1;
+
+                    _high <<= 1;
+                    _high |= highFirstShift;
+                    _low <<= 1;
+                    _low |= lowFirstShift;
+
+                    _high |= 0x80000000; // set MSB to 1
+                    _low &= 0x7FFFFFFF; // set MSB to 0
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+        private uint DecodeSymbol(string inputFile)
+        {
+            ulong range = (ulong)(_high - _low) + 1;
+            uint counts = (uint)((((ulong)(_decodingValue - _low) + 1) * _sums[TOTAL_SYMBOLS] - 1) / range);
+            uint symbol;
+
+            for (symbol = EOF; counts < _sums[symbol]; symbol--)
+            {
+                if (symbol <= 0)
+                {
+                    symbol = 0;
+                    break;
+                }
+            }
+
+            if (symbol >= EOF)
+            {
+                return EOF;
+            }
+
+            _high = _low + (uint)((range * _sums[symbol + 1]) / _sums[TOTAL_SYMBOLS] - 1);
+            _low = _low + (uint)((range * _sums[symbol]) / _sums[TOTAL_SYMBOLS]);
+            
+            for (; ; )
+            {
+                var highFirstShift = (_high & 0x80000000) >> 31;
+                var lowFirstShift = (_low & 0x80000000) >> 31;
+
+                var isHighUnderflow = ((_high & 0xC0000000) >> 30) == 2;
+                var isLowUnderflow = ((_low & 0xC0000000) >> 30) == 1;
+
+                if (highFirstShift == lowFirstShift)
+                {
+                    _high <<= 1;
+                    _high |= highFirstShift;
+                    _low <<= 1;
+                    _low |= lowFirstShift;
+
+                    _decodingValue <<= 1;
+                    _decodingValue |= GetBitsFromEncodedFile();
+                }
+                else if (isHighUnderflow && isLowUnderflow)
+                {
+                    _high <<= 1;
+                    _high |= highFirstShift;
+                    _low <<= 1;
+                    _low |= lowFirstShift;
+
+                    _decodingValue <<= 1;
+                    _decodingValue |= GetBitsFromEncodedFile();
+
+                    _high |= 0x80000000; // set MSB to 1
+                    _low &= 0x7FFFFFFF; // set MSB to 0
+                    _decodingValue ^= 0x80000000;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return symbol;
+        }
+
+        private void writeToFile(uint value)
+        {
+            value = value & 0x00000001;
+            _bitWriter.WriteNBits(1, value);
+
+            while (_underflowCounter > 0)
+            {
+                uint negated = (uint)(value == 0x00000001 ? 0x00000000 : 0x00000001);
+
+                _bitWriter.WriteNBits(1, negated);
+                _underflowCounter--;
+            }						
+        }
+
+        private void UpdateModel(uint symbol)
+        {
+            _counts[symbol]++;         
+            while (true)
+            {
+                symbol++;
+                if (symbol <= 0 || symbol > TOTAL_SYMBOLS)
+                {
+                    break;
+                }
+                _sums[symbol]++;
+            }
+        }
+
+        private void FlushBuffer()
+        {
+            _underflowCounter++;
+            var firstQuarter = _low >> 31;
+            writeToFile(firstQuarter);
         }
     }
 }

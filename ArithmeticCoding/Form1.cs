@@ -1,8 +1,5 @@
-﻿using BitReaderWriter;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace ArithmeticCoding
@@ -10,39 +7,19 @@ namespace ArithmeticCoding
     public partial class AppView : Form
     {
         private FileInfo _loadedFileInfo;
-        private ArithmeticCodingLogic<string> _arithmeticCodingLogic;
-        private BitReader _bitReader;
-        private BitWriter _bitWriter;
+        private ArithmeticCodingLogic _arithmeticCodingLogic;
 
         public AppView()
         {
             InitializeComponent();
-            reset();
+            resetControls();
         }
 
-        private void reset()
+        private void resetControls(string withText = null)
         {
             _loadedFileInfo = null;
-            _arithmeticCodingLogic = new ArithmeticCodingLogic<string>();
-            labelFilepath.Text = "no file loaded";
-        }
-
-        private List<uint> readBytesFromFilePath(int bitsSizeRead)
-        {
-            List<uint> values = new List<uint>();
-            long fileSize = 8 * new FileInfo(_loadedFileInfo.FullName).Length;
-            do
-            {
-                int readBits = bitsSizeRead;
-                if (readBits > fileSize)
-                {
-                    readBits = (int)fileSize;
-                }
-                uint value = _bitReader.ReadNBits(readBits);
-                values.Add(value);
-                fileSize -= readBits;
-            } while (fileSize > 0);
-            return values;
+            _arithmeticCodingLogic = new ArithmeticCodingLogic();
+            labelFilepath.Text = withText == null ? "No file loaded" : withText + " : No file loaded";
         }
 
         private void buttonLoadFile_Click(object sender, EventArgs e)
@@ -59,18 +36,8 @@ namespace ArithmeticCoding
         {
             if (_loadedFileInfo != null)
             {
-                // read file
-                //_bitReader = new BitReader(_loadedFileInfo.FullName);
-                //var fileReadUints = readBytesFromFilePath(8);
-                //_bitReader.Dispose();
-                
-                //// encode
-                //byte[] fileByteArray = fileReadUints.Select(x => (byte)x).ToArray();
-                //var encodedBytes = _arithmeticCodingLogic.Encode(fileByteArray);
-
-                // write file
-
-                reset();
+                _arithmeticCodingLogic.Encode(_loadedFileInfo.FullName);
+                resetControls(withText: "File Encoded successfully");
             }
             else
             {
@@ -82,30 +49,13 @@ namespace ArithmeticCoding
         {
             if (_loadedFileInfo != null)
             {
-                // read file
-                //_bitReader = new BitReader(_loadedFileInfo.FullName);
-                //var fileReadUints = readBytesFromFilePath(8);
-                //_bitReader.Dispose();
-
-                //// encode
-                //byte[] fileByteArray = fileReadUints.Select(x => (byte)x).ToArray();
-                //var decodedBytes = _arithmeticCodingLogic.Decode(fileByteArray);
-
-                // write file
-
-                reset();
+                _arithmeticCodingLogic.Decode(_loadedFileInfo.FullName);
+                resetControls(withText: "File Decoded successfully");
             }
             else
             {
                 MessageBox.Show("Load a file first!");
             }
-        }
-
-        private void test_Click(object sender, EventArgs e)
-        {
-            string[] values = new string[] { "B", "C", "C", "A", "A", "A", "B" };
-            var encodedBytes = _arithmeticCodingLogic.Encode(values);
-            var x = 1;
         }
     }
 }

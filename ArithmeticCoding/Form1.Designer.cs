@@ -32,7 +32,6 @@
             this.labelFilepath = new System.Windows.Forms.Label();
             this.buttonEncode = new System.Windows.Forms.Button();
             this.buttonDecode = new System.Windows.Forms.Button();
-            this.test = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // buttonLoadFile
@@ -74,22 +73,11 @@
             this.buttonDecode.UseVisualStyleBackColor = true;
             this.buttonDecode.Click += new System.EventHandler(this.buttonDecode_Click);
             // 
-            // test
-            // 
-            this.test.Location = new System.Drawing.Point(12, 79);
-            this.test.Name = "test";
-            this.test.Size = new System.Drawing.Size(149, 23);
-            this.test.TabIndex = 4;
-            this.test.Text = "test delete this";
-            this.test.UseVisualStyleBackColor = true;
-            this.test.Click += new System.EventHandler(this.test_Click);
-            // 
             // AppView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(366, 114);
-            this.Controls.Add(this.test);
             this.Controls.Add(this.buttonDecode);
             this.Controls.Add(this.buttonEncode);
             this.Controls.Add(this.labelFilepath);
@@ -107,7 +95,6 @@
         private System.Windows.Forms.Label labelFilepath;
         private System.Windows.Forms.Button buttonEncode;
         private System.Windows.Forms.Button buttonDecode;
-        private System.Windows.Forms.Button test;
     }
 }
 
