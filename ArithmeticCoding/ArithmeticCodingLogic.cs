@@ -1,4 +1,5 @@
 ﻿using BitReaderWriter;
+using System.IO;
 
 namespace ArithmeticCoding
 {
@@ -39,14 +40,14 @@ namespace ArithmeticCoding
             _bitReader = new BitReader(inputFile);
             string outputFileName = inputFile + ".ac";
             _bitWriter = new BitWriter(outputFileName);
-            var fileSize = bitsToRead * inputFile.Length;
+            var fileSize = bitsToRead * new FileInfo(inputFile).Length; // !!!!!!!!!!!!!!!! very important, no inputFile.length
             
             do
             {
                 int readBits = bitsToRead;
                 if (readBits > fileSize)
                 {
-                    readBits = fileSize;
+                    readBits = (int)fileSize;
                 }
 
                 var symbol = _bitReader.ReadNBits(readBits);
@@ -136,7 +137,7 @@ namespace ArithmeticCoding
         private uint DecodeSymbol()
         {
             ulong range = (ulong)(_high - _low) + 1;
-            var counts = (int)((((ulong)(_decodingValue - _low) + 1) * _sums[TOTAL_SYMBOLS] - 1) / range);
+            var counts = (uint)(((ulong)(_decodingValue - _low + 1) * _sums[TOTAL_SYMBOLS] - 1) / range);
             uint symbol;
 
             for (symbol = EOF; counts < _sums[symbol]; symbol--)
