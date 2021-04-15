@@ -123,7 +123,7 @@ namespace PredictorFormsApp
             else if (histoComboBox.SelectedIndex == 1)
             {
                 int[,] histParam = new int[imgLength, imgLength];
-                histParam = imgPred.errorMatrix;
+                histParam = imgPred._error;
                 freq = GetFreq(histParam); ;
             }
             else if (histoComboBox.SelectedIndex == 2)
@@ -166,21 +166,21 @@ namespace PredictorFormsApp
             bmpHeader = new List<uint>(readBMPHeader());
             bread.Dispose();
 
-            string outputName = filePath.Name + "[" + imgPred.predictionNumber + "].pre";
+            string outputName = filePath.Name + "[" + imgPred._predictionNumber + "].pre";
             bwrite = new BitWriter(Path.Combine(filePath.DirectoryName, outputName));
 
             foreach (var item in bmpHeader)
                 bwrite.WriteNBits(8, item);
                     
-            bwrite.WriteNBits(4, (uint)imgPred.predictionNumber);
+            bwrite.WriteNBits(4, (uint)imgPred._predictionNumber);
             for (int i = 0; i < imgLength; i++)
                 for (int j = 0; j < imgLength; j++)
                 {
-                    if (imgPred.errorMatrix[i, j] < 0)
+                    if (imgPred._error[i, j] < 0)
                         bwrite.WriteNBits(1, 1);
-                    else if (imgPred.errorMatrix[i, j] >= 0)
+                    else if (imgPred._error[i, j] >= 0)
                         bwrite.WriteNBits(1, 0);
-                    bwrite.WriteNBits(8, (uint)Math.Abs(imgPred.errorMatrix[i, j]));
+                    bwrite.WriteNBits(8, (uint)Math.Abs(imgPred._error[i, j]));
                 }
 
             bwrite.WriteNBits(7, 1);
@@ -236,8 +236,8 @@ namespace PredictorFormsApp
                 }
 
             imgPred = new ImagePredictor();
-            imgPred.Decode(errorMatrix, methodName: fileMethod);
-            decodedImg = imgPred.origDecodedMatrix;
+            imgPred.Decode(errorMatrix, methodNumber: fileMethod);
+            decodedImg = imgPred._decod;
 
             DecodedPBox.Image = new Bitmap(imgLength, imgLength);
             for (int i = 0; i < imgLength; i++)
@@ -275,11 +275,11 @@ namespace PredictorFormsApp
 
         private void ShowErrorBttn_Click(object sender, EventArgs e)
         {
-            Bitmap bmp = new Bitmap(imgPred.errorMatrix.GetLength(0), imgPred.errorMatrix.GetLength(1));
+            Bitmap bmp = new Bitmap(imgPred._error.GetLength(0), imgPred._error.GetLength(1));
             for (int i = 0; i < imgLength; i++)
                 for (int j = 0; j < imgLength; j++)
                 {
-                    int value = (int)(128.0d + imgPred.errorMatrix[i, j] * double.Parse(errorTxtBox.Text));
+                    int value = (int)(128.0d + imgPred._error[i, j] * double.Parse(errorTxtBox.Text));
                     if (value < 0)
                         value = 0;
                     else if (value > 255)
