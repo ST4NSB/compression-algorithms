@@ -5,30 +5,32 @@ namespace ArithmeticCoding
 {
     public class ArithmeticCodingLogic
     {
-        private const uint EOF = 256, TOTAL_SYMBOLS = 257;
-
         private BitReader _bitReader;
         private BitWriter _bitWriter;
 
+        private uint _eof, _totalSymbols;
         private uint _high, _low, _underflowCounter, _decodingValue;
         private uint[] _counts, _sums;
 
-        public ArithmeticCodingLogic()
+        public ArithmeticCodingLogic(uint total_symbols = 257, uint eof = 256)
         {
+            _totalSymbols = total_symbols;
+            _eof = eof;
+
             _low = uint.MinValue;
             _high = uint.MaxValue;
             _underflowCounter = uint.MinValue;
             _decodingValue = uint.MinValue;
 
-            _counts = new uint[TOTAL_SYMBOLS];
-            _sums = new uint[TOTAL_SYMBOLS + 1];
+            _counts = new uint[_totalSymbols];
+            _sums = new uint[_totalSymbols + 1];
             CreateDictionaryAndSum();
         }
 
         private void CreateDictionaryAndSum()
         {
             _sums[0] = 0;
-            for (uint i = 0; i < TOTAL_SYMBOLS; i++)
+            for (uint i = 0; i < _totalSymbols; i++)
             {
                 _counts[i] = 1;
                 _sums[i + 1] = _sums[i] + _counts[i];
@@ -59,7 +61,7 @@ namespace ArithmeticCoding
             
             _bitReader.Dispose();
             
-            EncodeSymbol(EOF);
+            EncodeSymbol(_eof);
             FlushBuffer();
             _bitWriter.WriteNBits(7, 1);
             _bitWriter.Dispose();
@@ -73,11 +75,11 @@ namespace ArithmeticCoding
             string outputFileName = inputFile + ".decoded." + extension;
             _bitWriter = new BitWriter(outputFileName);
 
-            _decodingValue |= GetBitsFromEncodedFile(32);
+            _decodingValue = GetBitsFromEncodedFile(32);
             for (; ; )
             {
                 uint symbol = DecodeSymbol();
-                if (symbol >= EOF) // eof
+                if (symbol >= _eof) // eof
                 {
                     break;
                 }
@@ -100,8 +102,8 @@ namespace ArithmeticCoding
         private void EncodeSymbol(uint symbol)
         {
             ulong range = (ulong)(_high - _low) + 1;
-            _high = _low + (uint)((range * _sums[symbol + 1]) / _sums[TOTAL_SYMBOLS] - 1);
-            _low = _low +  (uint)((range * _sums[symbol]) / _sums[TOTAL_SYMBOLS]);
+            _high = _low + (uint)((range * _sums[symbol + 1]) / _sums[_totalSymbols] - 1);
+            _low = _low +  (uint)((range * _sums[symbol]) / _sums[_totalSymbols]);
 
             for (; ; )
             {
@@ -137,25 +139,24 @@ namespace ArithmeticCoding
         private uint DecodeSymbol()
         {
             ulong range = (ulong)(_high - _low) + 1;
-            var counts = (uint)(((ulong)(_decodingValue - _low + 1) * _sums[TOTAL_SYMBOLS] - 1) / range);
+            var counts = (uint)(((ulong)(_decodingValue - _low + 1) * _sums[_totalSymbols] - 1) / range);
             uint symbol;
 
-            for (symbol = EOF; counts < _sums[symbol]; symbol--)
+            for (symbol = _eof; counts < _sums[symbol]; symbol--)
             {
-                if (symbol <= 0)
+                if (symbol == 0)
                 {
-                    symbol = 0;
                     break;
                 }
             }
 
-            if (symbol >= EOF)
+            if (symbol == _eof)
             {
-                return EOF;
+                return _eof;
             }
 
-            _high = _low + (uint)((range * _sums[symbol + 1]) / _sums[TOTAL_SYMBOLS] - 1);
-            _low = _low + (uint)((range * _sums[symbol]) / _sums[TOTAL_SYMBOLS]);
+            _high = _low + (uint)((range * _sums[symbol + 1]) / _sums[_totalSymbols] - 1);
+            _low = _low + (uint)((range * _sums[symbol]) / _sums[_totalSymbols]);
             
             for (; ; )
             {
@@ -197,10 +198,9 @@ namespace ArithmeticCoding
             value = value & 0x00000001;
             _bitWriter.WriteNBits(1, value);
 
+            uint negated = (uint)(value == 0x00000001 ? 0x00000000 : 0x00000001);
             while (_underflowCounter > 0)
             {
-                uint negated = (uint)(value == 0x00000001 ? 0x00000000 : 0x00000001);
-
                 _bitWriter.WriteNBits(1, negated);
                 _underflowCounter--;
             }						
@@ -212,7 +212,7 @@ namespace ArithmeticCoding
             while (true)
             {
                 symbol++;
-                if (symbol <= 0 || symbol > TOTAL_SYMBOLS)
+                if (symbol > _totalSymbols)
                 {
                     break;
                 }
