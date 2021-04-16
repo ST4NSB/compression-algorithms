@@ -8,13 +8,21 @@ namespace Predictor
         public byte[,] _predInit, _pred2FromDecod;
         public int[,] _error, _errorPred, _errorPredQ, _errorPredDQ;
         public int _predictionNumber, _k;
+        private byte _firstPixelValue, _upperLimit;
+
+        public ImagePredictor(int k, byte firstPixelValue = 128, byte upperLimit = 255)
+        {
+            _k = k;
+            _firstPixelValue = firstPixelValue;
+            _upperLimit = upperLimit;
+        }
 
         public void Encode(byte[,] original, int methodNumber)
         {
+            this._predictionNumber = methodNumber;
             int rows = original.GetLength(0), cols = original.GetLength(1);
             
             _predInit = new byte[rows, cols];
-            _pred2FromDecod = new byte[rows, cols];
             _decod = new byte[rows, cols];
             _error = new int[rows, cols];
             _errorPred = new int[rows, cols];
@@ -33,6 +41,7 @@ namespace Predictor
         
         public void Decode(int[,] errorPredQ, int methodNumber)
         {
+            this._predictionNumber = methodNumber;
             int rows = errorPredQ.GetLength(0), cols = errorPredQ.GetLength(1);
             
             _errorPredQ = errorPredQ;
@@ -108,14 +117,10 @@ namespace Predictor
             _decod[row, col] = LimitIntToByte(decodSum);
         }
 
-        private void setK(int k)
-        {
-            _k = k;
-        }
-
         private int QuantizationRule(int ep)
         {
-            return (int)Math.Floor((decimal)((ep + _k) / (2 * _k + 1)));
+            decimal res = ((decimal)ep + _k) / (2 * _k + 1);
+            return (int)Math.Floor(res);
         }
 
         private int DequantizationRule(int epq)
@@ -125,10 +130,9 @@ namespace Predictor
 
         private int CompressJpegMethod(int methodNumber, int A = 0, int B = 0, int C = 0)
         {
-            this._predictionNumber = methodNumber;
             switch (methodNumber)
             {
-                case 0: return 128;
+                case 0: return _firstPixelValue;
                 case 1: return A;
                 case 2: return B;
                 case 3: return C;
@@ -153,9 +157,9 @@ namespace Predictor
                 return 0;
             }
 
-            if (number >= 255)
+            if (number >= _upperLimit)
             {
-                return 255;
+                return _upperLimit;
             }
 
             return (byte)number;
