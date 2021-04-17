@@ -5,14 +5,15 @@ namespace ArithmeticCoding
 {
     public class ArithmeticCodingLogic
     {
-        private BitReader _bitReader;
-        private BitWriter _bitWriter;
+        public BitReader _bitReader;
+        private BitWriter _bitWr;
 
         private uint _eof, _totalSymbols;
-        private uint _high, _low, _underflowCounter, _decodingValue;
+        private uint _high, _low, _underflowCounter;
+        public uint _decodingValue;
         private uint[] _counts, _sums;
 
-        public ArithmeticCodingLogic(uint total_symbols = 257, uint eof = 256)
+        public ArithmeticCodingLogic(BitWriter bitWriterContext = null, BitReader bitReaderContext = null, uint total_symbols = 257, uint eof = 256)
         {
             _totalSymbols = total_symbols;
             _eof = eof;
@@ -24,6 +25,9 @@ namespace ArithmeticCoding
 
             _counts = new uint[_totalSymbols];
             _sums = new uint[_totalSymbols + 1];
+
+            _bitReader = bitReaderContext;
+            _bitWr = bitWriterContext;
             CreateDictionaryAndSum();
         }
 
@@ -41,7 +45,7 @@ namespace ArithmeticCoding
         {
             _bitReader = new BitReader(inputFile);
             string outputFileName = inputFile + ".ac";
-            _bitWriter = new BitWriter(outputFileName);
+            _bitWr = new BitWriter(outputFileName);
             var fileSize = bitsToRead * new FileInfo(inputFile).Length; // !!!!!!!!!!!!!!!! very important, no inputFile.length
             
             do
@@ -63,8 +67,8 @@ namespace ArithmeticCoding
             
             EncodeSymbol(_eof);
             FlushBuffer();
-            _bitWriter.WriteNBits(7, 1);
-            _bitWriter.Dispose();
+            _bitWr.WriteNBits(7, 1);
+            _bitWr.Dispose();
         }
 
         public void Decode(string inputFile, int bitsToWrite = 8)
@@ -73,7 +77,7 @@ namespace ArithmeticCoding
             var splittedInput = inputFile.Split('.');
             var extension = splittedInput[splittedInput.Length - 2];
             string outputFileName = inputFile + ".decoded." + extension;
-            _bitWriter = new BitWriter(outputFileName);
+            _bitWr = new BitWriter(outputFileName);
 
             _decodingValue = GetBitsFromEncodedFile(32);
             for (; ; )
@@ -84,13 +88,27 @@ namespace ArithmeticCoding
                     break;
                 }
 
-                _bitWriter.WriteNBits(bitsToWrite, symbol);
+                _bitWr.WriteNBits(bitsToWrite, symbol);
                 UpdateModel(symbol);
             }
             
             _bitReader.Dispose();
-            _bitWriter.WriteNBits(7, 1);
-            _bitWriter.Dispose();
+            _bitWr.WriteNBits(7, 1);
+            _bitWr.Dispose();
+        }
+
+        public void EncodeImageErrorValue(uint symbol)
+        {
+            EncodeSymbol(symbol);
+            UpdateModel(symbol);
+        }
+
+        public void SendLastDetailsOfImageError()
+        {
+            EncodeSymbol(_eof);
+            FlushBuffer();
+            _bitWr.WriteNBits(7, 1);
+            _bitWr.Dispose();
         }
 
         private uint GetBitsFromEncodedFile(int bitsToRead = 1)
@@ -136,7 +154,7 @@ namespace ArithmeticCoding
             }
         }
 
-        private uint DecodeSymbol()
+        public uint DecodeSymbol()
         {
             ulong range = (ulong)(_high - _low) + 1;
             var counts = (uint)(((ulong)(_decodingValue - _low + 1) * _sums[_totalSymbols] - 1) / range);
@@ -196,17 +214,17 @@ namespace ArithmeticCoding
         private void writeToFile(uint value)
         {
             value = value & 0x00000001;
-            _bitWriter.WriteNBits(1, value);
+            _bitWr.WriteNBits(1, value);
 
             uint negated = (uint)(value == 0x00000001 ? 0x00000000 : 0x00000001);
             while (_underflowCounter > 0)
             {
-                _bitWriter.WriteNBits(1, negated);
+                _bitWr.WriteNBits(1, negated);
                 _underflowCounter--;
             }						
         }
 
-        private void UpdateModel(uint symbol)
+        public void UpdateModel(uint symbol)
         {
             _counts[symbol]++;
             while (true)

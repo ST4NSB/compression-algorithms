@@ -3,7 +3,7 @@ using System.IO;
 
 namespace BitReaderWriter
 {
-    class BitReader : IDisposable
+    public class BitReader : IDisposable
     {
         FileStream fileStream;
 
@@ -66,7 +66,7 @@ namespace BitReaderWriter
         }
     }
 
-    class BitWriter : IDisposable
+    public class BitWriter : IDisposable
     {
         FileStream fileStream;
 

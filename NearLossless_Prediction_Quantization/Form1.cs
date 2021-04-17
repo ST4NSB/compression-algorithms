@@ -11,6 +11,7 @@ using System.Windows.Forms.DataVisualization.Charting;
 using Predictor;
 using BitReaderWriter;
 using System.IO;
+using ArithmeticCoding;
 
 namespace PredictorFormsApp
 {
@@ -166,8 +167,26 @@ namespace PredictorFormsApp
                     SaveByJpegTable();
                     break;
                 case 2:
+                    SaveByArithmeticMethod();
                     break;
             }
+        }
+
+        private void SaveByArithmeticMethod()
+        {
+            const uint allSymbols = (_imgLength * 2), eof = allSymbols - 1;
+            ArithmeticCodingLogic arithmCoder = new ArithmeticCodingLogic(bitWriterContext: _bitwriter, total_symbols: allSymbols, eof: eof);
+
+            for (int i = 0; i < _imgLength; i++)
+            {
+                for (int j = 0; j < _imgLength; j++)
+                {
+                    uint symbol = (uint)(_imgPred._errorPredQ[i, j]+ (_imgLength - 1));
+                    arithmCoder.EncodeImageErrorValue(symbol);
+                }
+            }
+
+            arithmCoder.SendLastDetailsOfImageError();
             _bitwriter.Dispose();
         }
 
@@ -199,6 +218,7 @@ namespace PredictorFormsApp
             }
 
             _bitwriter.WriteNBits(7, 1);
+            _bitwriter.Dispose();
         }
 
         private void SaveByFixedMethod()
@@ -220,6 +240,7 @@ namespace PredictorFormsApp
             }
 
             _bitwriter.WriteNBits(7, 1);
+            _bitwriter.Dispose();
         }
 
         private void DecodeBttn_Click(object sender, EventArgs e)
@@ -240,6 +261,7 @@ namespace PredictorFormsApp
                     errorList = new List<int>(readJpegTableCompressedFile());
                     break;
                 case 2:
+                    errorList = new List<int>(readArithmeticCompressedFile());
                     break;
             }
 
@@ -277,6 +299,30 @@ namespace PredictorFormsApp
                 }
             }
             //DecodedPBox.Image.Save(filePath.DirectoryName + "\\decodedImage.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
+        }
+
+        private List<int> readArithmeticCompressedFile()
+        {
+            const uint allSymbols = (_imgLength * 2), eof = allSymbols - 1;
+            List<int> values = new List<int>();
+            ArithmeticCodingLogic arithmCoder = new ArithmeticCodingLogic(bitReaderContext: _bitReader, total_symbols: allSymbols, eof: eof);
+            
+            arithmCoder._decodingValue = _bitReader.ReadNBits(32);
+            for (; ; )
+            {
+                uint symbol = arithmCoder.DecodeSymbol();
+                if (symbol == eof) // eof
+                {
+                    arithmCoder._bitReader.Dispose();
+                    break;
+                }
+
+                int symbolToErrorRange = (int)symbol - (_imgLength - 1);
+                values.Add(symbolToErrorRange);
+                arithmCoder.UpdateModel(symbol);
+            }
+
+            return values;
         }
 
         private List<int> readJpegTableCompressedFile()
