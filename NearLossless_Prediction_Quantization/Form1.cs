@@ -27,6 +27,7 @@ namespace PredictorFormsApp
         FileInfo _filePath;
         List<uint> _bmpHeader;
         int[,] _errorPredSaved, _mainError, _quantizedError;
+        private const int maxValuePixel = 255;
 
         public Form1()
         {
@@ -35,10 +36,12 @@ namespace PredictorFormsApp
             MaximizeBox = false;
 
             chart.ChartAreas[0].AxisY.Minimum = 0;
-            chart.ChartAreas[0].AxisY.Maximum = 511.0d;
+            chart.ChartAreas[0].AxisY.Maximum = 1000.0d;
             chart.ChartAreas[0].AxisX.Minimum = -255;
             chart.ChartAreas[0].AxisX.Maximum = 255;
             chart.ChartAreas[0].AxisX.Interval = 51;
+            chart.Series[0]["PointWidth"] = "1";
+            _originalImg = new byte[_imgLength, _imgLength];
 
             methodComboBox.Items.AddRange(new string[] 
             {
@@ -174,14 +177,14 @@ namespace PredictorFormsApp
 
         private void SaveByArithmeticMethod()
         {
-            const uint allSymbols = (_imgLength * 2), eof = allSymbols - 1;
-            ArithmeticCodingLogic arithmCoder = new ArithmeticCodingLogic(bitWriterContext: _bitwriter, total_symbols: allSymbols, eof: eof);
+            const uint numSymbols = ((maxValuePixel * 2) + 1), eof = numSymbols - 1;
+            ArithmeticCodingLogic arithmCoder = new ArithmeticCodingLogic(bitWriterContext: _bitwriter, total_symbols: numSymbols, eof: eof);
 
             for (int i = 0; i < _imgLength; i++)
             {
                 for (int j = 0; j < _imgLength; j++)
                 {
-                    uint symbol = (uint)(_imgPred._errorPredQ[i, j]+ (_imgLength - 1));
+                    uint symbol = (uint)(_imgPred._errorPredQ[i, j] + (maxValuePixel));
                     arithmCoder.EncodeImageErrorValue(symbol);
                 }
             }
@@ -303,9 +306,9 @@ namespace PredictorFormsApp
 
         private List<int> readArithmeticCompressedFile()
         {
-            const uint allSymbols = (_imgLength * 2), eof = allSymbols - 1;
+            const uint numSymbols = (_imgLength * 2), eof = numSymbols - 1;
             List<int> values = new List<int>();
-            ArithmeticCodingLogic arithmCoder = new ArithmeticCodingLogic(bitReaderContext: _bitReader, total_symbols: allSymbols, eof: eof);
+            ArithmeticCodingLogic arithmCoder = new ArithmeticCodingLogic(bitReaderContext: _bitReader, total_symbols: numSymbols, eof: eof);
             
             arithmCoder._decodingValue = _bitReader.ReadNBits(32);
             for (; ; )
@@ -406,8 +409,26 @@ namespace PredictorFormsApp
 
         private void scaleButton_Click(object sender, EventArgs e)
         {
-            chart.ChartAreas[0].AxisY.Minimum = 0;
-            chart.ChartAreas[0].AxisY.Maximum = 511.0d * double.Parse(scaleTextBox.Text);
+            //chart.ChartAreas[0].AxisY.Minimum = 0;
+            //chart.ChartAreas[0].AxisY.Maximum = double.Parse(scaleTextBox.Text);
+
+            chart.Series[0].Points.Clear();
+
+            switch (histoComboBox.SelectedIndex)
+            {
+                case 0:
+                    DrawHistogram(_originalImg, double.Parse(scaleTextBox.Text));
+                    break;
+                case 1:
+                    DrawHistogram(_errorPredSaved, double.Parse(scaleTextBox.Text));
+                    break;
+                case 2:
+                    DrawHistogram(_imgPred._errorPredQ, double.Parse(scaleTextBox.Text));
+                    break;
+                case 3:
+                    DrawHistogram(_imgPred._decod, double.Parse(scaleTextBox.Text));
+                    break;
+            }
         }
 
         private void histogramBttn_Click(object sender, EventArgs e)
@@ -431,11 +452,11 @@ namespace PredictorFormsApp
             }
         }
 
-        private void DrawHistogram<T>(T[,] histParam)
+        private void DrawHistogram<T>(T[,] histParam, double scale = 1.0d)
         {
             foreach (var item in GetFreq(histParam))
             {
-                chart.Series[0].Points.AddXY(item.Key, item.Value);
+                chart.Series[0].Points.AddXY(item.Key, item.Value * scale);
             }
         }
 
@@ -487,11 +508,15 @@ namespace PredictorFormsApp
         private void buttonCompError_Click(object sender, EventArgs e)
         {
             int max = int.MinValue, min = int.MaxValue;
-
-            for (int i = 0; i < _mainError.GetLength(0); i++)
+            int rows = _originalImg.GetLength(0), cols = _originalImg.GetLength(1);
+            _mainError = new int[rows, cols];
+            
+            for (int i = 0; i < rows; i++)
             {
-                for (int j = 0; j < _mainError.GetLength(1); j++)
+                for (int j = 0; j < cols; j++)
                 {
+                    _mainError[i, j] = _originalImg[i, j] - _imgPred._decod[i, j];
+                     
                     if (_mainError[i, j] > max)
                     {
                         max = _mainError[i, j];

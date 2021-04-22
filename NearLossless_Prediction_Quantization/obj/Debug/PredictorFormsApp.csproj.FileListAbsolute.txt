@@ -38,3 +38,13 @@ D:\Projects\github\compression-algorithms\QuantizationJpeqCompression\obj\Debug\
 D:\Projects\github\compression-algorithms\QuantizationJpeqCompression\obj\Debug\PredictorFormsApp.csproj.CoreCompileInputs.cache
 D:\Projects\github\compression-algorithms\QuantizationJpeqCompression\obj\Debug\PredictorFormsApp.exe
 D:\Projects\github\compression-algorithms\QuantizationJpeqCompression\obj\Debug\PredictorFormsApp.pdb
+D:\Projects\github\compression-algorithms\NearLossless_Prediction_Quantization\bin\Debug\PredictorFormsApp.exe.config
+D:\Projects\github\compression-algorithms\NearLossless_Prediction_Quantization\bin\Debug\PredictorFormsApp.exe
+D:\Projects\github\compression-algorithms\NearLossless_Prediction_Quantization\bin\Debug\PredictorFormsApp.pdb
+D:\Projects\github\compression-algorithms\NearLossless_Prediction_Quantization\obj\Debug\PredictorFormsApp.csprojAssemblyReference.cache
+D:\Projects\github\compression-algorithms\NearLossless_Prediction_Quantization\obj\Debug\PredictorFormsApp.Form1.resources
+D:\Projects\github\compression-algorithms\NearLossless_Prediction_Quantization\obj\Debug\PredictorFormsApp.Properties.Resources.resources
+D:\Projects\github\compression-algorithms\NearLossless_Prediction_Quantization\obj\Debug\PredictorFormsApp.csproj.GenerateResource.cache
+D:\Projects\github\compression-algorithms\NearLossless_Prediction_Quantization\obj\Debug\PredictorFormsApp.csproj.CoreCompileInputs.cache
+D:\Projects\github\compression-algorithms\NearLossless_Prediction_Quantization\obj\Debug\PredictorFormsApp.exe
+D:\Projects\github\compression-algorithms\NearLossless_Prediction_Quantization\obj\Debug\PredictorFormsApp.pdb

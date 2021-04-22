@@ -8,12 +8,12 @@ namespace Predictor
         public byte[,] _predInit, _pred2FromDecod;
         public int[,] _error, _errorPred, _errorPredQ, _errorPredDQ;
         public int _predictionNumber, _k;
-        private byte _firstPixelValue, _upperLimit;
+        private byte _firstPixelPrediction, _upperLimit;
 
         public ImagePredictor(int k, byte firstPixelValue = 128, byte upperLimit = 255)
         {
             _k = k;
-            _firstPixelValue = firstPixelValue;
+            _firstPixelPrediction = firstPixelValue;
             _upperLimit = upperLimit;
         }
 
@@ -63,22 +63,22 @@ namespace Predictor
         {
             if (row == 0 && col == 0)
             {
-                _predInit[row, col] = (byte)CompressJpegMethod(0);
+                _predInit[row, col] = (byte)PredictionMethod(0);
             }
             else if (row == 0)
             {
-                _predInit[row, col] = (byte)CompressJpegMethod(1, A: _decod[row, col - 1]);
+                _predInit[row, col] = (byte)PredictionMethod(1, A: _decod[row, col - 1]);
             }
             else if (col == 0)
             {
-                _predInit[row, col] = (byte)CompressJpegMethod(2, B: _decod[row - 1, col]);
+                _predInit[row, col] = (byte)PredictionMethod(2, B: _decod[row - 1, col]);
             }
             else
             {
                 byte A = _decod[row, col - 1];
                 byte B = _decod[row - 1, col];
                 byte C = _decod[row - 1, col - 1];
-                _predInit[row, col] = LimitIntToByte(CompressJpegMethod(methodNumber, A, B, C));
+                _predInit[row, col] = LimitIntToByte(PredictionMethod(methodNumber, A, B, C));
             }
 
             _errorPred[row, col] = origValue - _predInit[row, col];
@@ -93,22 +93,22 @@ namespace Predictor
         {
             if (row == 0 && col == 0)
             {
-                _pred2FromDecod[row, col] = (byte)CompressJpegMethod(0);
+                _pred2FromDecod[row, col] = (byte)PredictionMethod(0);
             }
             else if (row == 0)
             {
-                _pred2FromDecod[row, col] = (byte)CompressJpegMethod(1, A: _decod[row, col - 1]);
+                _pred2FromDecod[row, col] = (byte)PredictionMethod(1, A: _decod[row, col - 1]);
             }
             else if (col == 0)
             {
-                _pred2FromDecod[row, col] = (byte)CompressJpegMethod(2, B: _decod[row - 1, col]);
+                _pred2FromDecod[row, col] = (byte)PredictionMethod(2, B: _decod[row - 1, col]);
             }
             else
             {
                 byte A = _decod[row, col - 1];
                 byte B = _decod[row - 1, col];
                 byte C = _decod[row - 1, col - 1];
-                _pred2FromDecod[row, col] = LimitIntToByte(CompressJpegMethod(methodNumber, A, B, C));
+                _pred2FromDecod[row, col] = LimitIntToByte(PredictionMethod(methodNumber, A, B, C));
             }
 
             _errorPredDQ[row, col] = DequantizationRule(_errorPredQ[row, col]);
@@ -128,11 +128,11 @@ namespace Predictor
             return epq * (2 * _k + 1);
         }
 
-        private int CompressJpegMethod(int methodNumber, int A = 0, int B = 0, int C = 0)
+        private int PredictionMethod(int methodNumber, int A = 0, int B = 0, int C = 0)
         {
             switch (methodNumber)
             {
-                case 0: return _firstPixelValue;
+                case 0: return _firstPixelPrediction;
                 case 1: return A;
                 case 2: return B;
                 case 3: return C;
