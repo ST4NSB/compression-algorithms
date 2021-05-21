@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -13,12 +14,20 @@ namespace WaveletDecomposition
 {
     public partial class WaveletApp : Form
     {
+        private const int _imageLength = 512;
+        FileInfo _filePath;
         private WaveletDecompositionLogic _waveletDecompositionLogic;
+        private float[,] _origImage, _imageWaveletProcessed;
+        private int _stageLevel;
 
         public WaveletApp()
         {
             InitializeComponent();
             _waveletDecompositionLogic = new WaveletDecompositionLogic();
+            comboBoxCompression.Items.AddRange(new string[] {
+                "1", "2", "3", "4", "5"
+            });
+            comboBoxCompression.SelectedIndex = 4;
         }
 
         [DllImport("kernel32.dll", SetLastError = true)]
@@ -30,88 +39,167 @@ namespace WaveletDecomposition
             AllocConsole();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void bttnLoad_Click(object sender, EventArgs e)
         {
-            var input = new float[]
-            {
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                9,
-                9,
-                9,
-                9,
-                9,
-                3,
-                2,
-                7,
-                5,
-                2,
-                8,
-                2,
-                55,
-                2,
-                7,
-                3,
-                1,
-                6,
-                9,
-                1,
-                3,
-                2,
-                66
-            };
+            _origImage = new float[_imageLength, _imageLength];
+            _imageWaveletProcessed = new float[_imageLength, _imageLength];
 
-            var output = new float[]
+            OpenFileDialog open = new OpenFileDialog();
+            open.Filter = "Bitmap files (*.bmp)|*.bmp";
+            if (open.ShowDialog() == DialogResult.OK)
             {
-                1.33364f
-                ,3.073267f
-                ,5f
-                ,6.963367f
-                ,8.83318f
-                ,8.802874f
-                ,9.533891f
-                ,3.550919f
-                ,5.705122f
-                ,3.143611f
-                ,17.77056f
-                ,17.42257f
-                ,2.318916f
-                ,5.911796f
-                ,2.18338f
-                ,19.36972f
-                ,0.25f
-                ,-7.450581E-09f
-                ,-5.215406E-08f
-                ,-0.1250003f
-                ,-0.1250003f
-                ,-0.5476309f
-                ,3.767892f
-                ,-3.484163f
-                ,0.1349129f
-                ,3.924443f
-                ,58.5579f
-                ,2.356987f
-                ,-4.85324f
-                ,6.123066f
-                ,-2.014145f
-                ,71.06794f
-            };
-            
-            var res = _waveletDecompositionLogic.SynthesisH(output, 32);
+                string fileName = open.FileName;
+                _filePath = new FileInfo(fileName);
+                var img = Image.FromFile(fileName);
+                imageOrig.Image = new Bitmap(img);
+                img.Dispose();
 
-            var k = 0;
-            foreach(var item in res)
-            {
-                Console.WriteLine(input[k] - Math.Round(item));
-                k++;
+                // load image
+                for (int i = 0; i < _imageLength; i++)
+                {
+                    for (int j = 0; j < _imageLength; j++)
+                    {
+                        _origImage[i, j] = ((Bitmap)imageOrig.Image).GetPixel(i, j).R;
+                        _imageWaveletProcessed[i, j] = _origImage[i, j];
+                    }
+                }
             }
+        }
+
+        private void bttnAnalysis_Click(object sender, EventArgs e)
+        {
+            _stageLevel = 1;
+            var level = int.Parse(comboBoxCompression.Text);
+            while (_stageLevel <= level)
+            {
+                AnalysisPhase(_stageLevel);
+                _stageLevel++;
+            }
+        }
+
+        private void bttnSynthesis_Click(object sender, EventArgs e)
+        {
+            _stageLevel = 1;
+            var level = int.Parse(comboBoxCompression.Text);
+            while (_stageLevel <= level)
+            {
+                SynthesisPhase(level);
+                level--;
+            }
+        }
+
+
+        private void AnalysisPhase(int level)
+        {
+            int levelBound = (int)(Math.Pow(2, (level - 1)));
+
+            // processing Analysis Horizontal
+            var tempImage = new float[_imageLength, _imageLength];
+            for (int lineIndex = 0; lineIndex < (_imageLength / levelBound); lineIndex++)
+            {
+                float[] lineToProcess = new float[_imageLength / levelBound];
+                for (int i = 0; i < (_imageLength / levelBound); i++)
+                {
+                    lineToProcess[i] = _imageWaveletProcessed[lineIndex, i];
+                }
+                var resLine = _waveletDecompositionLogic.AnalysisH(lineToProcess, _imageLength / levelBound);
+                for (int i = 0; i < resLine.Count; i++)
+                {
+                    tempImage[lineIndex, i] = resLine[i];
+                }
+            }
+
+            _imageWaveletProcessed = tempImage;
+
+            // processing Analysis Vertical
+            tempImage = new float[_imageLength, _imageLength];
+            for (int colIndex = 0; colIndex < _imageLength; colIndex++)
+            {
+                float[] colToProcess = new float[_imageLength / levelBound];
+                for (int i = 0; i < (_imageLength / levelBound); i++)
+                {
+                    colToProcess[i] = _imageWaveletProcessed[i, colIndex];
+                }
+                var resLine = _waveletDecompositionLogic.AnalysisV(colToProcess, _imageLength / levelBound);
+                for (int i = 0; i < resLine.Count; i++)
+                {
+                    tempImage[i, colIndex] = resLine[i];
+                }
+            }
+
+            _imageWaveletProcessed = tempImage;
+        }
+
+        private void SynthesisPhase(int level)
+        {
+            int levelBound = (int)(Math.Pow(2, (level - 1)));
+
+            // processing Synthesis Vertical
+            var tempImage = new float[_imageLength, _imageLength];
+            for (int colIndex = 0; colIndex < _imageLength; colIndex++)
+            {
+                float[] colToProcess = new float[_imageLength / _stageLevel];
+                for (int i = 0; i < (_imageLength / _stageLevel); i++)
+                {
+                    colToProcess[i] = _imageWaveletProcessed[i, colIndex];
+                }
+                var resLine = _waveletDecompositionLogic.SynthesisV(colToProcess, _imageLength / _stageLevel);
+                for (int i = 0; i < resLine.Count; i++)
+                {
+                    tempImage[i, colIndex] = resLine[i];
+                }
+            }
+
+            _imageWaveletProcessed = tempImage;
+
+            // processing Synthesis Horizontal
+            tempImage = new float[_imageLength, _imageLength];
+            for (int lineIndex = 0; lineIndex < (_imageLength / levelBound); lineIndex++)
+            {
+                float[] lineToProcess = new float[_imageLength / levelBound];
+                for (int i = 0; i < (_imageLength / levelBound); i++)
+                {
+                    lineToProcess[i] = _imageWaveletProcessed[lineIndex, i];
+                }
+                var resLine = _waveletDecompositionLogic.SynthesisH(lineToProcess, _imageLength / levelBound);
+                for (int i = 0; i < resLine.Count; i++)
+                {
+                    tempImage[lineIndex, i] = resLine[i];
+                }
+            }
+
+            _imageWaveletProcessed = tempImage;
+        }
+
+        private void bttnError_Click(object sender, EventArgs e)
+        {
+            if (_origImage == null || _imageWaveletProcessed == null)
+            {
+                return;
+            }
+
+            int max = int.MinValue, min = int.MaxValue;
+
+            for(int i = 0; i < _imageLength; i++)
+            {
+                for(int j = 0; j < _imageLength; j++)
+                {
+                    var errorValue = (int)(_origImage[i, j] - Math.Round(_imageWaveletProcessed[i, j]));
+
+                    if (errorValue > max)
+                    {
+                        max = errorValue;
+                    }
+
+                    if (errorValue < min)
+                    {
+                        min = errorValue;
+                    }
+                }
+            }
+
+            labelMax.Text = "Max: " + max;
+            labelMin.Text = "Min: " + min;
         }
     }
 }
